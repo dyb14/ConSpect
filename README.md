@@ -16,68 +16,6 @@ Starting from local spatial representations, ConSpect performs diffusion in the 
 
 <p align="center"><em>Overall architecture of ConSpect and the structure of a ConSpect Block.</em></p>
 
-ConSpect uses the **C3-P1-T1** historical input configuration:
-
-- **Closeness (C = 3):** the three most recent time slots.
-- **Period (P = 1):** the corresponding time slot from the previous day.
-- **Trend (T = 1):** the corresponding time slot from the previous week.
-
-The three temporal inputs are first processed by independent `3 × 3` convolutions. Their features are concatenated and fused by a `1 × 1` convolution to obtain the initial representation $F^{(0)}$. The shared backbone contains **four ConSpect Blocks**.
-
-Each ConSpect Block contains three main components:
-
-### 1. Local Feature Extraction
-
-A local `3 × 3` convolution extracts reliable neighborhood-level spatial information and forms the local representation $L^{(l)}$.
-
-### 2. Spectral Diffusion Operator
-
-ConSpect introduces nonlocal information through continuous spatial diffusion on the regular urban grid. The diffusion operation is implemented in the Laplacian spectral domain:
-
-```text
-DCT → spectral diffusion exp(-τ_l(X) Λ) → IDCT
-```
-
-The diffusion scale $\tau_l(X)$ determines how far information propagates outward from the target region. Small diffusion scales concentrate the response near the target, while larger scales extend the response toward more distant concentric regions.
-
-We characterize this propagation using the **effective diffusion range** $R_{0.95}$, defined as the smallest Chebyshev range containing 95% of the normalized diffusion response.
-
-### 3. State-Adaptive Range Control and Bounded Fusion
-
-A shared state controller extracts a sample-level representation from $F^{(0)}$ using global average pooling and an MLP. It generates a modulation factor $s(X)$, bounded between `0.5` and `2`, which adjusts the base diffusion scale of each ConSpect Block:
-
-```text
-τ_l(X) = τ̄_l · s(X)
-```
-
-This allows different traffic samples to form different effective diffusion ranges.
-
-The local and diffusion features are then combined using a learnable bounded coefficient $\alpha_l$:
-
-```text
-Z^(l) = (1 - α_l) L^(l) + α_l D^(l),    0 < α_l < 1
-```
-
-External features are mapped independently and fused at the prediction stage before producing the final two-channel citywide flow field.
-
-## Main Results
-
-ConSpect is evaluated on two real-world citywide grid-based flow datasets, **TaxiBJ** and **BikeNYC**. Prediction errors are measured after inverse normalization over all test samples, both flow channels, and all grid cells.
-
-| Dataset | RMSE | MAE |
-|---|---:|---:|
-| TaxiBJ | **16.067 ± 0.094** | **9.524 ± 0.052** |
-| BikeNYC | **5.122 ± 0.046** | **2.631 ± 0.023** |
-
-Relative to the best competing results reported in the manuscript, ConSpect reduces RMSE by **3.73%** on TaxiBJ and **19.08%** on BikeNYC, while also reducing MAE by **5.42%** and **26.71%**, respectively.
-
-The experiments further show that:
-
-- continually enlarging a fixed diffusion range does not consistently reduce prediction error;
-- different traffic samples prefer different spatial ranges;
-- state-adaptive diffusion forms sample-dependent effective diffusion ranges;
-- controlled integration of local and diffused information improves citywide flow prediction.
-
 ## Repository Structure
 
 ```text
