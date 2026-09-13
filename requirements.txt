@@ -1,0 +1,5 @@
+numpy>=1.26
+scikit-learn>=1.5
+tables>=3.9
+torch>=2.6
+tqdm>=4.66

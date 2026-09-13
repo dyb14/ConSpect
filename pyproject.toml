@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "conspect-flow"
+version = "0.1.0"
+description = "ConSpect: State-Adaptive Spectral Diffusion Network for Citywide Flow Prediction"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.26",
+  "scikit-learn>=1.5",
+  "tables>=3.9",
+  "torch>=2.6",
+  "tqdm>=4.66",
+]
+
+[tool.setuptools.packages.find]
+include = ["conspect*"]
